@@ -200,3 +200,4 @@ Deploy anywhere that runs Docker or Node + Postgres (Render, Railway, Fly.io, a 
 ## 📄 License
 
 MIT — built for the EWA408510 E-Commerce & Web Application final project.
+# ecommerce-backend
