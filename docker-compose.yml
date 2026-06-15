@@ -1,0 +1,53 @@
+# ----------------------------------------------------------------------------
+# Matic E-Commerce - local & demo stack
+#   - db:  PostgreSQL 16
+#   - api: Express + Prisma backend
+# Usage:
+#   docker compose up --build
+#   docker compose exec api npm run db:seed   # populate demo data
+# ----------------------------------------------------------------------------
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: matic_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: matic
+      POSTGRES_PASSWORD: matic_password
+      POSTGRES_DB: matic_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - matic_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U matic -d matic_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: matic_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      API_PREFIX: /api/v1
+      CORS_ORIGIN: '*'
+      DATABASE_URL: postgresql://matic:matic_password@db:5432/matic_db?schema=public
+      JWT_ACCESS_SECRET: change_me_access_secret_super_long_random_string
+      JWT_REFRESH_SECRET: change_me_refresh_secret_super_long_random_string
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      ADMIN_EMAIL: admin@matic.rw
+      ADMIN_PASSWORD: Admin@12345
+      ADMIN_NAME: Matic Administrator
+    ports:
+      - '4000:4000'
+
+volumes:
+  matic_pgdata:
